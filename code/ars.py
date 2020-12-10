@@ -10,6 +10,7 @@ import time
 import os
 import numpy as np
 import gym
+
 import logz
 import ray
 import utils
@@ -32,6 +33,7 @@ class Worker(object):
                  delta_std=0.02):
 
         # initialize OpenAI environment for each worker
+        import pybullet_envs
         self.env = gym.make(env_name)
         self.env.seed(env_seed)
 
@@ -99,7 +101,7 @@ class Worker(object):
 
                 # for evaluation we do not shift the rewards (shift = 0) and we use the
                 # default rollout length (1000 for the MuJoCo locomotion tasks)
-                reward, r_steps = self.rollout(shift = 0., rollout_length = self.env.spec.timestep_limit)
+                reward, r_steps = self.rollout(shift = 0., rollout_length = 200)
                 rollout_rewards.append(reward)
                 
             else:
@@ -159,7 +161,7 @@ class ARSLearner(object):
 
         logz.configure_output_dir(logdir)
         logz.save_params(params)
-        
+        import pybullet_envs
         env = gym.make(env_name)
         
         self.timesteps = 0
@@ -355,6 +357,7 @@ def run_ars(params):
     if not(os.path.exists(logdir)):
         os.makedirs(logdir)
 
+    import pybullet_envs
     env = gym.make(params['env_name'])
     ob_dim = env.observation_space.shape[0]
     ac_dim = env.action_space.shape[0]
@@ -386,7 +389,7 @@ def run_ars(params):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--env_name', type=str, default='HalfCheetah-v1')
+    parser.add_argument('--env_name', type=str, default='CartPoleContinuousBulletEnv-v0')
     parser.add_argument('--n_iter', '-n', type=int, default=1000)
     parser.add_argument('--n_directions', '-nd', type=int, default=8)
     parser.add_argument('--deltas_used', '-du', type=int, default=8)
@@ -407,7 +410,7 @@ if __name__ == '__main__':
     parser.add_argument('--filter', type=str, default='MeanStdFilter')
 
     local_ip = socket.gethostbyname(socket.gethostname())
-    ray.init(redis_address= local_ip + ':6379')
+    ray.init(address= local_ip + ':6379')
     
     args = parser.parse_args()
     params = vars(args)
