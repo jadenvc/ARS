@@ -348,7 +348,6 @@ class ARSLearner(object):
         return 
 
 def run_ars(params):
-
     dir_path = params['dir_path']
 
     if not(os.path.exists(dir_path)):
@@ -361,12 +360,18 @@ def run_ars(params):
     env = gym.make(params['env_name'])
     ob_dim = env.observation_space.shape[0]
     ac_dim = env.action_space.shape[0]
+    ac_lb = env.action_space.low
+    ac_ub = env.action_space.high
 
     # set policy parameters. Possible filters: 'MeanStdFilter' for v2, 'NoFilter' for v1.
-    policy_params={'type':'linear',
+    policy_params={'type': params["policy_type"],
                    'ob_filter':params['filter'],
+                   'policy_network_size' : params["policy_network_size"],
                    'ob_dim':ob_dim,
-                   'ac_dim':ac_dim}
+                   'ac_dim':ac_dim,
+                   'action_lower_bound' : ac_lb,
+                   'action_upper_bound' : ac_ub,
+    }
 
     ARS = ARSLearner(env_name=params['env_name'],
                      policy_params=policy_params,
@@ -408,6 +413,7 @@ if __name__ == '__main__':
 
     # for ARS V1 use filter = 'NoFilter'
     parser.add_argument('--filter', type=str, default='MeanStdFilter')
+    parser.add_argument('--policy_network_size', type=int, default=128)
 
     local_ip = socket.gethostbyname(socket.gethostname())
     ray.init(address= local_ip + ':6379')

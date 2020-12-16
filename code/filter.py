@@ -232,7 +232,7 @@ class MeanStdFilter(Filter):
             self.rs, self.buffer)
 
     
-def get_filter(filter_config, shape = None):
+def ars_filter(filter_config, shape = None):
     if filter_config == "MeanStdFilter":
         return MeanStdFilter(shape)
     elif filter_config == "NoFilter":
