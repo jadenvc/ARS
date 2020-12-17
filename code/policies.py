@@ -12,9 +12,6 @@ Benjamin Recht
 It is a modified policy class from third_party/py/ARS/code/policies.py.
 """
 
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
 import filter as ars_filter
 import numpy as np
 from six.moves import range
@@ -48,7 +45,7 @@ class Policy(object):
     mean = policy_params.get("observation_filter_mean", None)
     std = policy_params.get("observation_filter_std", None)
     n = policy_params.get("init_timesteps", None)
-    #self.observation_filter.set_stats((mean, std, n))
+    self.observation_filter.set_stats((mean, std, n))
     self.update_filter = update_filter
 
   def update_weights(self, new_weights):

@@ -23,6 +23,9 @@ class Filter(object):
             copy (Filter): Copy of self"""
         raise NotImplementedError
 
+    def set_stats(self, stats):
+        pass
+
     def sync(self, other):
         """Copies all state from other filter to self."""
         raise NotImplementedError
@@ -98,6 +101,19 @@ class RunningStat(object):
             self._M[...] += delta / self._n
             self._S[...] += delta * delta * n1 / self._n
             
+    def set_init_stats(self, mean, std, n):
+        changed = False
+        if n is not None:
+          self._n = n
+          changed = True
+        if mean is not None:
+          self._M = mean
+          changed = True
+        if std is not None:
+          self._S = np.square(std) * (self._n - 1)
+          changed = True
+        return changed
+
 
     def update(self, other):
         n1 = self._n
@@ -222,6 +238,12 @@ class MeanStdFilter(Filter):
         # are set to zero as a result. 
         self.std[self.std < 1e-7] = float("inf") 
         return
+
+    def set_stats(self, stats):
+        mean, std, n = stats
+        changed = self.rs.set_init_stats(mean, std, n)
+        if changed:
+            self.stats_increment()
 
     def get_stats(self):
         return self.rs.mean, (self.rs.std + 1e-8)

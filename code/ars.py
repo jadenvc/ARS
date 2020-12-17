@@ -43,7 +43,9 @@ class Worker(object):
         self.deltas = SharedNoiseTable(deltas, env_seed + 7)
         self.policy_params = policy_params
         if policy_params['type'] == 'linear':
-            self.policy = LinearPolicy(policy_params)
+            self.policy = LinearPolicy2(policy_params)
+        elif policy_params['type'] == 'nn':
+            self.policy = FullyConnectedNeuralNetworkPolicy(policy_params)
         else:
             raise NotImplementedError
             
@@ -55,7 +57,7 @@ class Worker(object):
         """ 
         Get current policy weights and current statistics of past states.
         """
-        assert self.policy_params['type'] == 'linear'
+        #assert self.policy_params['type'] == 'linear'
         return self.policy.get_weights_plus_stats()
     
 
@@ -101,7 +103,7 @@ class Worker(object):
 
                 # for evaluation we do not shift the rewards (shift = 0) and we use the
                 # default rollout length (1000 for the MuJoCo locomotion tasks)
-                reward, r_steps = self.rollout(shift = 0., rollout_length = 200)
+                reward, r_steps = self.rollout(shift = 0., rollout_length = self.rollout_length)
                 rollout_rewards.append(reward)
                 
             else:
@@ -198,7 +200,10 @@ class ARSLearner(object):
 
         # initialize policy 
         if policy_params['type'] == 'linear':
-            self.policy = LinearPolicy(policy_params)
+            self.policy = LinearPolicy2(policy_params)
+            self.w_policy = self.policy.get_weights()
+        elif policy_params['type'] == 'nn':
+            self.policy = FullyConnectedNeuralNetworkPolicy(policy_params)
             self.w_policy = self.policy.get_weights()
         else:
             raise NotImplementedError
@@ -273,7 +278,9 @@ class ARSLearner(object):
         rollout_rewards = rollout_rewards[idx,:]
         
         # normalize rewards by their standard deviation
-        rollout_rewards /= np.std(rollout_rewards)
+        np_std = np.std(rollout_rewards)
+        if np_std>1e-6:
+          rollout_rewards /= np_std
 
         t1 = time.time()
         # aggregate rollouts to form g_hat, the gradient used to compute SGD step
@@ -408,12 +415,12 @@ if __name__ == '__main__':
     # for Humanoid-v1 used shift = 5
     parser.add_argument('--shift', type=float, default=0)
     parser.add_argument('--seed', type=int, default=237)
-    parser.add_argument('--policy_type', type=str, default='linear')
+    parser.add_argument('--policy_type', type=str, default= 'linear')
     parser.add_argument('--dir_path', type=str, default='data')
 
     # for ARS V1 use filter = 'NoFilter'
     parser.add_argument('--filter', type=str, default='MeanStdFilter')
-    parser.add_argument('--policy_network_size', type=int, default=128)
+    parser.add_argument('--policy_network_size', type=list, default=(64,64))
 
     local_ip = socket.gethostbyname(socket.gethostname())
     ray.init(address= local_ip + ':6379')
