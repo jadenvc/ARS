@@ -401,8 +401,8 @@ def run_ars(params):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--env_name', type=str, default='CartPoleContinuousBulletEnv-v0')
-    parser.add_argument('--n_iter', '-n', type=int, default=1000)
+    parser.add_argument('--env_name', type=str, default='InvertedPendulumSwingupBulletEnv-v0')
+    parser.add_argument('--n_iter', '-n', type=int, default=10000)
     parser.add_argument('--n_directions', '-nd', type=int, default=8)
     parser.add_argument('--deltas_used', '-du', type=int, default=8)
     parser.add_argument('--step_size', '-s', type=float, default=0.02)
@@ -415,7 +415,7 @@ if __name__ == '__main__':
     # for Humanoid-v1 used shift = 5
     parser.add_argument('--shift', type=float, default=0)
     parser.add_argument('--seed', type=int, default=237)
-    parser.add_argument('--policy_type', type=str, default= 'linear')
+    parser.add_argument('--policy_type', type=str, default= 'nn')
     parser.add_argument('--dir_path', type=str, default='data')
 
     # for ARS V1 use filter = 'NoFilter'

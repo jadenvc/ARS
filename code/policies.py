@@ -45,7 +45,12 @@ class Policy(object):
     mean = policy_params.get("observation_filter_mean", None)
     std = policy_params.get("observation_filter_std", None)
     n = policy_params.get("init_timesteps", None)
-    self.observation_filter.set_stats((mean, std, n))
+    #using set_stats doesn't work, directly write mean/std
+    # self.observation_filter.set_stats((mean, std, n))
+    self.observation_filter.mean = mean
+    self.observation_filter.std = std
+    
+    
     self.update_filter = update_filter
 
   def update_weights(self, new_weights):
@@ -162,8 +167,10 @@ class FullyConnectedNeuralNetworkPolicy(Policy):
           self._layer_sizes[ith_layer] * self._layer_sizes[ith_layer + 1])
       self._layer_weight_end_idx.append(num_weights)
     self.weights = np.zeros(num_weights, dtype=np.float64)
+    
     if "weights" in policy_params:
-      self.weights = policy_params["weights"]
+      self.update_weights(policy_params["weights"])
+      
 
   def act(self, ob):
     """Maps the observation to action.

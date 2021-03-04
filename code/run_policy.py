@@ -7,27 +7,62 @@ Example usage:
 """
 import numpy as np
 import gym
-
+import pybullet_envs
+import json
+from policies import *
+import time
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('expert_policy_file', type=str)
-    parser.add_argument('envname', type=str)
+    parser.add_argument('--expert_policy_file', type=str, default="data/lin_policy_plus.npz")
+    parser.add_argument('--envname', type=str, default="InvertedPendulumSwingupBulletEnv-v0")
     parser.add_argument('--render', action='store_true')
+    parser.add_argument('--nosleep', action='store_true')
+
     parser.add_argument('--num_rollouts', type=int, default=20,
                         help='Number of expert rollouts')
+    parser.add_argument('--json_file', type=str, default="data/params.json")
     args = parser.parse_args()
 
-    print('loading and building expert policy')
-    lin_policy = np.load(args.expert_policy_file)
-    lin_policy = lin_policy.items()[0][1]
-    
-    M = lin_policy[0]
-    # mean and std of state vectors estimated online by ARS. 
-    mean = lin_policy[1]
-    std = lin_policy[2]
-        
+    #print('create gym environment:', args.envname)
     env = gym.make(args.envname)
+
+    print('loading and building expert policy')
+        
+    with open(args.json_file) as f:
+       params = json.load(f)
+    print("params=",params)
+    
+    data = np.load(args.expert_policy_file, allow_pickle=True)
+    lst = data.files
+    weights = data[lst[0]][0]
+    mu = data[lst[0]][1]
+    print("mu=",mu)
+    std = data[lst[0]][2]
+    print("std=",std)
+        
+    ob_dim = env.observation_space.shape[0]
+    ac_dim = env.action_space.shape[0]
+    ac_lb = env.action_space.low
+    ac_ub = env.action_space.high
+    
+    policy_params={'type': params["policy_type"],
+                   'ob_filter':params['filter'],
+                   'policy_network_size' : params["policy_network_size"],
+                   'ob_dim':ob_dim,
+                   'ac_dim':ac_dim,
+                   'action_lower_bound' : ac_lb,
+                   'action_upper_bound' : ac_ub,
+    }
+    policy_params['weights'] = weights
+    policy_params['observation_filter_mean'] = mu
+    policy_params['observation_filter_std'] = std
+    
+    policy = FullyConnectedNeuralNetworkPolicy(policy_params, update_filter=False)
+    
+    policy.get_weights()
+            
+    
 
     returns = []
     observations = []
@@ -39,7 +74,7 @@ def main():
         totalr = 0.
         steps = 0
         while not done:
-            action = np.dot(M, (obs - mean)/std)
+            action = policy.act(obs)
             observations.append(obs)
             actions.append(action)
             
@@ -49,9 +84,12 @@ def main():
             steps += 1
             if args.render:
                 env.render()
-            if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
-            if steps >= env.spec.timestep_limit:
-                break
+            if not args.nosleep:
+              time.sleep(1./240.)
+            #if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
+            #if steps >= env.spec.timestep_limit:
+            #    break
+        #print("steps=",steps)
         returns.append(totalr)
 
     print('returns', returns)
