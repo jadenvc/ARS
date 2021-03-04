@@ -42,15 +42,6 @@ class Policy(object):
     self.observation_filter = ars_filter.ars_filter(
         policy_params["ob_filter"], shape=self.ob_dim)
 
-    mean = policy_params.get("observation_filter_mean", None)
-    std = policy_params.get("observation_filter_std", None)
-    n = policy_params.get("init_timesteps", None)
-    #using set_stats doesn't work, directly write mean/std
-    # self.observation_filter.set_stats((mean, std, n))
-    self.observation_filter.mean = mean
-    self.observation_filter.std = std
-    
-    
     self.update_filter = update_filter
 
   def update_weights(self, new_weights):
@@ -170,7 +161,14 @@ class FullyConnectedNeuralNetworkPolicy(Policy):
     
     if "weights" in policy_params:
       self.update_weights(policy_params["weights"])
-      
+    mean = policy_params.get("observation_filter_mean", None)
+    std = policy_params.get("observation_filter_std", None)
+    n = policy_params.get("init_timesteps", None)
+    
+    if policy_params["ob_filter"]=="MeanStdFilter" and update_filter==False:
+      self.observation_filter.mean = mean
+      self.observation_filter.std = std
+    
 
   def act(self, ob):
     """Maps the observation to action.
