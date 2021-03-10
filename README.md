@@ -47,7 +47,7 @@ python code/ars.py
 ```
 
 All arguments passed into ARS are optional and can be modified to train other environments, use different hyperparameters, or use  different random seeds.
-For example, to train a policy for Humanoid-v1, execute the following command:
+For example, to train a policy for InvertedPendulumSwingupBulletEnv-v0, execute the following command:
 
 ```
 python code/ars.py --env_name InvertedPendulumSwingupBulletEnv-v0 --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
@@ -61,14 +61,8 @@ python -m pybullet_utils.runServer
 ```
 When running a gym environment, it will automatically connect to this GUI window over shared memory.
 
-To render a trained policy, execute a command of the following form:
+To render a trained policy, execute a command of the following form: (--render is not needed, since the env will connect to the running GUI server)
 
 ```
-python code/run_policy.py trained_polices/env_name/policy_directory_path/policy_file_name.npz env_name --render
-```
-
-For example, to render InvertedPendulumSwingupBulletEnv-v0 execute:
-
-```
-python code/run_policy.py trained_policies/InvertedPendulumSwingupBulletEnv-v0/lin_policy_plus.npz InvertedPendulumSwingupBulletEnv-v0 --render
+python code/run_policy.py --expert_policy_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/lin_policy_plus.npz --envname=InvertedPendulumSwingupBulletEnv-v0 --json_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/params.json
 ```
