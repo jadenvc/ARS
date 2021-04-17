@@ -1,6 +1,6 @@
 # Augmented Random Search (ARS)
 
-ARS is a random search method for training linear policies for continuous control problems, based on the paper ["Simple random search provides a competitive approach to reinforcement learning."](https://arxiv.org/abs/1803.07055) 
+ARS is a random search method for training linear or fully connected neural network policies for continuous control problems, based on the paper ["Simple random search provides a competitive approach to reinforcement learning."](https://arxiv.org/abs/1803.07055) 
 
 ## Prerequisites for running ARS
 
@@ -50,7 +50,19 @@ All arguments passed into ARS are optional and can be modified to train other en
 For example, to train a policy for InvertedPendulumSwingupBulletEnv-v0, execute the following command:
 
 ```
-python code/ars.py --env_name InvertedPendulumSwingupBulletEnv-v0 --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
+python code/ars.py --env_name InvertedPendulumSwingupBulletEnv-v0 --policy_type=linear --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
+```
+
+You can also train a fully connected neural network, specifying the sizes of the hidden layers, as follows:
+
+```
+python code/ars.py --env_name AntBulletEnv-v0 --policy_type=nn --policy_network_size=128,64 --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
+```
+
+By default, the activation function is tanh, you can also select clip, by adding this argument:
+
+```
+--activation=clip
 ```
 
 ## Rendering Trained Policy
@@ -65,4 +77,10 @@ To render a trained policy, execute a command of the following form: (--render i
 
 ```
 python code/run_policy.py --expert_policy_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/lin_policy_plus.npz --envname=InvertedPendulumSwingupBulletEnv-v0 --json_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/params.json
+```
+
+Or enjoy a fully connected neural network policy, AntBulletEnv-v0:
+
+```
+python code/run_policy.py  --envname=AntBulletEnv-v0 --expert_policy_file=trained_policies/AntBulletEnv-v0/nn_policy_plus.npz --json_file=trained_policies/AntBulletEnv-v0/params.json
 ```

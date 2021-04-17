@@ -307,6 +307,8 @@ class ARSLearner(object):
     def train(self, num_iter):
 
         start = time.time()
+        best_mean_rewards = -1e30
+        
         for i in range(num_iter):
             
             t1 = time.time()
@@ -320,7 +322,13 @@ class ARSLearner(object):
                 
                 rewards = self.aggregate_rollouts(num_rollouts = 100, evaluate = True)
                 w = ray.get(self.workers[0].get_weights_plus_stats.remote())
-                np.savez(self.logdir + "/lin_policy_plus", w)
+                np.savez(self.logdir + "/lin_policy_plus_latest", w)
+                
+                mean_rewards = np.mean(rewards)
+                if (mean_rewards > best_mean_rewards):
+                  best_mean_rewards = mean_rewards
+                  np.savez(self.logdir + "/lin_policy_plus_best_"+str(i+1), w)
+                  
                 
                 print(sorted(self.params.items()))
                 logz.log_tabular("Time", time.time() - start)
@@ -356,7 +364,7 @@ class ARSLearner(object):
 
 def run_ars(params):
     dir_path = params['dir_path']
-
+    activation = params['activation']
     if not(os.path.exists(dir_path)):
         os.makedirs(dir_path)
     logdir = dir_path
@@ -370,12 +378,15 @@ def run_ars(params):
     ac_lb = env.action_space.low
     ac_ub = env.action_space.high
 
+    policy_sizes_list = [int(item) for item in params['policy_network_size_list'][0].split(',')]
+    print("policy_sizes_list=",policy_sizes_list)
     # set policy parameters. Possible filters: 'MeanStdFilter' for v2, 'NoFilter' for v1.
     policy_params={'type': params["policy_type"],
                    'ob_filter':params['filter'],
-                   'policy_network_size' : params["policy_network_size"],
+                   'policy_network_size' : policy_sizes_list,
                    'ob_dim':ob_dim,
                    'ac_dim':ac_dim,
+                   'activation' : activation,
                    'action_lower_bound' : ac_lb,
                    'action_upper_bound' : ac_ub,
     }
@@ -402,25 +413,30 @@ if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--env_name', type=str, default='InvertedPendulumSwingupBulletEnv-v0')
-    parser.add_argument('--n_iter', '-n', type=int, default=10000)
+    parser.add_argument('--n_iter', '-n', type=int, default=100000)
     parser.add_argument('--n_directions', '-nd', type=int, default=8)
     parser.add_argument('--deltas_used', '-du', type=int, default=8)
     parser.add_argument('--step_size', '-s', type=float, default=0.02)
     parser.add_argument('--delta_std', '-std', type=float, default=.03)
     parser.add_argument('--n_workers', '-e', type=int, default=18)
-    parser.add_argument('--rollout_length', '-r', type=int, default=1000)
+    parser.add_argument('--rollout_length', '-r', type=int, default=400)
 
     # for Swimmer-v1 and HalfCheetah-v1 use shift = 0
     # for Hopper-v1, Walker2d-v1, and Ant-v1 use shift = 1
     # for Humanoid-v1 used shift = 5
     parser.add_argument('--shift', type=float, default=0)
     parser.add_argument('--seed', type=int, default=237)
-    parser.add_argument('--policy_type', type=str, default= 'nn')
+    parser.add_argument('--policy_type', type=str, help="Policy type, linear or nn (neural network)", default= 'linear')
     parser.add_argument('--dir_path', type=str, default='data')
 
     # for ARS V1 use filter = 'NoFilter'
     parser.add_argument('--filter', type=str, default='MeanStdFilter')
-    parser.add_argument('--policy_network_size', type=list, default=(64,64))
+    parser.add_argument('--activation', type=str, help="Neural network policy activation function, tanh or clip", default="tanh")
+    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default=[128,64])
+    
+
+
+    
 
     local_ip = socket.gethostbyname(socket.gethostname())
     ray.init(address= local_ip + ':6379')
