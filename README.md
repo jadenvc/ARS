@@ -84,3 +84,9 @@ Or enjoy a fully connected neural network policy, AntBulletEnv-v0:
 ```
 python code/run_policy.py  --envname=AntBulletEnv-v0 --expert_policy_file=trained_policies/AntBulletEnv-v0/nn_policy_plus.npz --json_file=trained_policies/AntBulletEnv-v0/params.json
 ```
+or a spinning running HumanoidBullet-v0:
+```
+python code/run_policy.py  --envname=HumanoidBulletEnv-v0 --expert_policy_file=trained_policies/HumanoidBullet-v0/nn_policy_plus.npz --json_file=trained_policies/HumanoidBullet-v0/params.json
+```
+
+[![Spinning running HumanoidBullet-v0](https://github.com/erwincoumans/ARS/blob/master/trained_policies/HumanoidBullet-v0/spin_run.png)](https://www.youtube.com/watch?v=Z08TLBca_so&hd=1 "Spinning running HumanoidBullet-v0")
