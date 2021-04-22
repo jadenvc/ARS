@@ -9,31 +9,39 @@ import numpy as np
 import gym
 import pybullet_envs
 import json
-from policies import *
+from arspb.policies import *
 import time
+import arspb.trained_policies as tp
+import os
+
 def main():
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument('--expert_policy_file', type=str, default="data/lin_policy_plus.npz")
+    parser.add_argument('--expert_policy_file', type=str, default="")
     parser.add_argument('--envname', type=str, default="InvertedPendulumSwingupBulletEnv-v0")
     parser.add_argument('--render', action='store_true')
     parser.add_argument('--nosleep', action='store_true')
 
     parser.add_argument('--num_rollouts', type=int, default=20,
                         help='Number of expert rollouts')
-    parser.add_argument('--json_file', type=str, default="data/params.json")
+    parser.add_argument('--json_file', type=str, default="")
     args = parser.parse_args()
 
     #print('create gym environment:', args.envname)
     env = gym.make(args.envname)
 
     print('loading and building expert policy')
-        
+    if len(args.json_file)==0:
+      args.json_file = tp.getDataPath()+"/"+ args.envname+"/params.json"    
     with open(args.json_file) as f:
        params = json.load(f)
     print("params=",params)
-    
+    if len(args.expert_policy_file)==0:
+      args.expert_policy_file=tp.getDataPath()+"/"+args.envname+"/nn_policy_plus.npz" 
+      if not os.path.exists(args.expert_policy_file):
+        args.expert_policy_file=tp.getDataPath()+"/"+args.envname+"/lin_policy_plus.npz"
     data = np.load(args.expert_policy_file, allow_pickle=True)
+
     lst = data.files
     weights = data[lst[0]][0]
     mu = data[lst[0]][1]
@@ -62,8 +70,9 @@ def main():
     
     policy.get_weights()
             
-    
-
+   
+    if args.render: 
+      env.render('human')
     returns = []
     observations = []
     actions = []
@@ -85,7 +94,7 @@ def main():
             if args.render:
                 env.render()
             if not args.nosleep:
-              time.sleep(1./240.)
+              time.sleep(1./60.)
             #if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
             #if steps >= env.spec.timestep_limit:
             #    break

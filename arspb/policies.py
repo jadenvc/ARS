@@ -12,10 +12,10 @@ Benjamin Recht
 It is a modified policy class from third_party/py/ARS/code/policies.py.
 """
 
-import filter as ars_filter
+import arspb.filter as ars_filter
 import numpy as np
 from six.moves import range
-import env_utils
+import arspb.env_utils
 
 
 class Policy(object):

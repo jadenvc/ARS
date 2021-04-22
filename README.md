@@ -19,6 +19,11 @@ pip install ray
 ```
 For more information on Ray see http://ray.readthedocs.io/en/latest/. 
 
+Install this repo using pip or clone using git:
+```
+pip install arspb
+```
+
 ## Running ARS
 
 First start Ray by executing a command of the following form:
@@ -43,20 +48,20 @@ export MKL_NUM_THREADS=1
 To train a policy for InvertedPendulumSwingupBulletEnv-v0, execute the following command: 
 
 ```
-python code/ars.py
+python arspb/ars.py
 ```
 
 All arguments passed into ARS are optional and can be modified to train other environments, use different hyperparameters, or use  different random seeds.
 For example, to train a policy for InvertedPendulumSwingupBulletEnv-v0, execute the following command:
 
 ```
-python code/ars.py --env_name InvertedPendulumSwingupBulletEnv-v0 --policy_type=linear --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
+python arspb/ars.py --env_name InvertedPendulumSwingupBulletEnv-v0 --policy_type=linear --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
 ```
 
 You can also train a fully connected neural network, specifying the sizes of the hidden layers, as follows:
 
 ```
-python code/ars.py --env_name AntBulletEnv-v0 --policy_type=nn --policy_network_size=128,64 --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
+python arspb/ars.py --env_name AntBulletEnv-v0 --policy_type=nn --policy_network_size=128,64 --n_directions 230 --deltas_used 230 --step_size 0.02 --delta_std 0.0075 --n_workers 48 --shift 5
 ```
 
 By default, the activation function is tanh, you can also select clip, by adding this argument:
@@ -76,17 +81,17 @@ When running a gym environment, it will automatically connect to this GUI window
 To render a trained policy, execute a command of the following form: (--render is not needed, since the env will connect to the running GUI server)
 
 ```
-python code/run_policy.py --expert_policy_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/lin_policy_plus.npz --envname=InvertedPendulumSwingupBulletEnv-v0 --json_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/params.json
+python arspb/run_policy.py --expert_policy_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/lin_policy_plus.npz --envname=InvertedPendulumSwingupBulletEnv-v0 --json_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/params.json
 ```
 
 Or enjoy a fully connected neural network policy, AntBulletEnv-v0:
 
 ```
-python code/run_policy.py  --envname=AntBulletEnv-v0 --expert_policy_file=trained_policies/AntBulletEnv-v0/nn_policy_plus.npz --json_file=trained_policies/AntBulletEnv-v0/params.json
+python arspb/run_policy.py  --envname=AntBulletEnv-v0 --expert_policy_file=trained_policies/AntBulletEnv-v0/nn_policy_plus.npz --json_file=trained_policies/AntBulletEnv-v0/params.json
 ```
 or a spinning running HumanoidBullet-v0 (click image below for video)
 ```
-python code/run_policy.py  --envname=HumanoidBulletEnv-v0 --expert_policy_file=trained_policies/HumanoidBullet-v0/nn_policy_plus.npz --json_file=trained_policies/HumanoidBullet-v0/params.json
+python3 arspb/run_policy.py  --envname=HumanoidBulletEnv-v0 --expert_policy_file=arspb/trained_policies/HumanoidBulletEnv-v0/nn_policy_plus.npz --json_file=arspb/trained_policies/HumanoidBulletEnv-v0/params.json --render
 ```
 
-[![Spinning running HumanoidBullet-v0](https://github.com/erwincoumans/ARS/blob/master/trained_policies/HumanoidBullet-v0/spin_run.png)](https://www.youtube.com/watch?v=Z08TLBca_so&hd=1 "Spinning running HumanoidBullet-v0")
+[![Spinning running HumanoidBullet-v0](https://github.com/erwincoumans/ARS/blob/master/arspb/trained_policies/HumanoidBullet-v0/spin_run.png)](https://www.youtube.com/watch?v=Z08TLBca_so&hd=1 "Spinning running HumanoidBullet-v0")

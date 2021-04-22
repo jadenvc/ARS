@@ -11,13 +11,13 @@ import os
 import numpy as np
 import gym
 
-import logz
+import arspb.logz
 import ray
-import utils
-import optimizers
-from policies import *
+import arspb.utils
+import arspb.optimizers
+from arspb.policies import *
 import socket
-from shared_noise import *
+from arspb.shared_noise import *
 
 @ray.remote
 class Worker(object):
