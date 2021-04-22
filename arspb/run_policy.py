@@ -14,7 +14,7 @@ import time
 import arspb.trained_policies as tp
 import os
 
-def main():
+def main(argv):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--expert_policy_file', type=str, default="")
@@ -25,7 +25,10 @@ def main():
     parser.add_argument('--num_rollouts', type=int, default=20,
                         help='Number of expert rollouts')
     parser.add_argument('--json_file', type=str, default="")
-    args = parser.parse_args()
+    if len(argv):
+      args = parser.parse_args(argv)
+    else:
+      args = parser.parse_args()
 
     #print('create gym environment:', args.envname)
     env = gym.make(args.envname)
@@ -106,4 +109,5 @@ def main():
     print('std of return', np.std(returns))
     
 if __name__ == '__main__':
-    main()
+    import sys
+    main(sys.argv[1:])

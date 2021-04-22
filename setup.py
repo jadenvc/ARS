@@ -24,7 +24,7 @@ for n in need_files:
 
 setup(
     name="arspb",
-    version="0.1",
+    version="0.2",
     description="ARS for PyBullet (Augmented Random Search, with linear and neural network policy",
     long_description="ARS for PyBullet (Augmented Random Search, with linear and neural network policy",
     url="https://github.com/erwincoumans/ARS",
