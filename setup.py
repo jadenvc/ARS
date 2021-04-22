@@ -26,6 +26,7 @@ setup(
     name="arspb",
     version="0.1",
     description="ARS for PyBullet (Augmented Random Search, with linear and neural network policy",
+    long_description="ARS for PyBullet (Augmented Random Search, with linear and neural network policy",
     url="https://github.com/erwincoumans/ARS",
     author="Various",
     author_email="noreply@google.com",
