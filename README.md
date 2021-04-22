@@ -4,7 +4,7 @@ ARS is a random search method for training linear or fully connected neural netw
 
 ## Prerequisites for running ARS
 
-Our ARS implementation relies on Python 3, OpenAI Gym version 0.9.3, PyBullet and the Ray library for parallel computing.  
+Our ARS implementation relies on Python 3, OpenAI Gym, PyBullet and the Ray library for parallel computing.  
 
 To install OpenAI Gym follow the instructions here:
 https://github.com/openai/gym
