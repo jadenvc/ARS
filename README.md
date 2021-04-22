@@ -94,4 +94,4 @@ or a spinning running HumanoidBullet-v0 (click image below for video)
 python3 arspb/run_policy.py  --envname=HumanoidBulletEnv-v0 --expert_policy_file=arspb/trained_policies/HumanoidBulletEnv-v0/nn_policy_plus.npz --json_file=arspb/trained_policies/HumanoidBulletEnv-v0/params.json --render
 ```
 
-[![Spinning running HumanoidBullet-v0](https://github.com/erwincoumans/ARS/blob/master/arspb/trained_policies/HumanoidBullet-v0/spin_run.png)](https://www.youtube.com/watch?v=Z08TLBca_so&hd=1 "Spinning running HumanoidBullet-v0")
+[![Spinning running HumanoidBullet-v0](https://github.com/erwincoumans/ARS/blob/master/arspb/trained_policies/HumanoidBulletEnv-v0/spin_run.png)](https://www.youtube.com/watch?v=Z08TLBca_so&hd=1 "Spinning running HumanoidBullet-v0")
