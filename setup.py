@@ -24,12 +24,12 @@ for n in need_files:
 
 setup(
     name="arspb",
-    version="0.2",
-    description="ARS for PyBullet (Augmented Random Search, with linear and neural network policy",
-    long_description="ARS for PyBullet (Augmented Random Search, with linear and neural network policy",
+    version="0.3",
+    description="ARS for PyBullet and Tiny Differentiable Simulator (Augmented Random Search, with linear and neural network policy",
+    long_description="ARS for PyBullet and Tiny Differentiable Simulator (Augmented Random Search, with linear and neural network policy",
     url="https://github.com/erwincoumans/ARS",
     author="Various",
-    author_email="noreply@google.com",
+    author_email="erwincoumans@google.com",
     classifiers=[],
     packages=[
         "arspb","arspb.trained_policies"

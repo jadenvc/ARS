@@ -79,9 +79,16 @@ class LinearPolicy2(Policy):
     if isinstance(self.ob_dim, dict):
       self.ob_dim = sum(self.ob_dim.values())
     self.weights = np.zeros(self.ac_dim * self.ob_dim, dtype=np.float64)
+    
     if "weights" in policy_params:
-      self.weights = policy_params["weights"]
-
+      self.update_weights(policy_params["weights"])
+    mean = policy_params.get("observation_filter_mean", None)
+    std = policy_params.get("observation_filter_std", None)
+    
+    if policy_params["ob_filter"]=="MeanStdFilter" and update_filter==False:
+      self.observation_filter.mean = mean
+      self.observation_filter.std = std
+      
   def act(self, ob):
     """Maps the observation to action.
 
@@ -100,24 +107,6 @@ class LinearPolicy2(Policy):
         (self.action_low + self.action_high) / 2.0)
     return actions
 
-class LinearPolicy(Policy):
-    """
-    Linear policy class that computes action as <w, ob>.
-    """
-
-    def __init__(self, policy_params):
-        Policy.__init__(self, policy_params)
-        self.weights = np.zeros((self.ac_dim, self.ob_dim), dtype = np.float64)
-
-    def act(self, ob):
-        ob = self.observation_filter(ob, update=self.update_filter)
-        return np.dot(self.weights, ob)
-
-    def get_weights_plus_stats(self):
-
-        mu, std = self.observation_filter.get_stats()
-        aux = np.asarray([self.weights, mu, std])
-        return aux
 
 
 

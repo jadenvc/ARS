@@ -8,6 +8,10 @@ Example usage:
 import numpy as np
 import gym
 import pybullet_envs
+try:
+  import tds_environments
+except:
+  pass
 import json
 from arspb.policies import *
 import time
@@ -18,7 +22,7 @@ def main(argv):
     import argparse
     parser = argparse.ArgumentParser()
     parser.add_argument('--expert_policy_file', type=str, default="")
-    parser.add_argument('--envname', type=str, default="InvertedPendulumSwingupBulletEnv-v0")
+    
     parser.add_argument('--render', action='store_true')
     parser.add_argument('--nosleep', action='store_true')
 
@@ -29,9 +33,6 @@ def main(argv):
       args = parser.parse_args(argv)
     else:
       args = parser.parse_args()
-
-    #print('create gym environment:', args.envname)
-    env = gym.make(args.envname)
 
     print('loading and building expert policy')
     if len(args.json_file)==0:
@@ -44,6 +45,10 @@ def main(argv):
       if not os.path.exists(args.expert_policy_file):
         args.expert_policy_file=tp.getDataPath()+"/"+args.envname+"/lin_policy_plus.npz"
     data = np.load(args.expert_policy_file, allow_pickle=True)
+
+    print('create gym environment:', params["env_name"])
+    env = gym.make(params["env_name"])
+
 
     lst = data.files
     weights = data[lst[0]][0]
@@ -59,7 +64,6 @@ def main(argv):
     
     policy_params={'type': params["policy_type"],
                    'ob_filter':params['filter'],
-                   'policy_network_size' : params["policy_network_size"],
                    'ob_dim':ob_dim,
                    'ac_dim':ac_dim,
                    'action_lower_bound' : ac_lb,
@@ -68,11 +72,18 @@ def main(argv):
     policy_params['weights'] = weights
     policy_params['observation_filter_mean'] = mu
     policy_params['observation_filter_std'] = std
-    
-    policy = FullyConnectedNeuralNetworkPolicy(policy_params, update_filter=False)
-    
+    if params["policy_type"]=="nn":
+      print("FullyConnectedNeuralNetworkPolicy")
+      policy_sizes_string = params['policy_network_size_list'].split(',')
+      print("policy_sizes_string=",policy_sizes_string)
+      policy_sizes_list = [int(item) for item in policy_sizes_string]
+      print("policy_sizes_list=",policy_sizes_list)
+      policy_params['policy_network_size'] = policy_sizes_list
+      policy = FullyConnectedNeuralNetworkPolicy(policy_params, update_filter=False)
+    else:
+      print("LinearPolicy2")
+      policy = LinearPolicy2(policy_params, update_filter=False)
     policy.get_weights()
-            
    
     if args.render: 
       env.render('human')
@@ -96,8 +107,8 @@ def main(argv):
             steps += 1
             if args.render:
                 env.render()
-            if not args.nosleep:
-              time.sleep(1./60.)
+                if not args.nosleep:
+                  time.sleep(1./60.)
             #if steps % 100 == 0: print("%i/%i"%(steps, env.spec.timestep_limit))
             #if steps >= env.spec.timestep_limit:
             #    break

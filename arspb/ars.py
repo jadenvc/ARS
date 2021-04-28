@@ -11,10 +11,10 @@ import os
 import numpy as np
 import gym
 
-import arspb.logz
+import arspb.logz as logz
 import ray
-import arspb.utils
-import arspb.optimizers
+import arspb.utils as utils
+import arspb.optimizers as optimizers
 from arspb.policies import *
 import socket
 from arspb.shared_noise import *
@@ -33,7 +33,15 @@ class Worker(object):
                  delta_std=0.02):
 
         # initialize OpenAI environment for each worker
-        import pybullet_envs
+        try:
+          import pybullet_envs
+        except:
+          pass
+        try:
+          import tds_environments
+        except:
+          pass
+
         self.env = gym.make(env_name)
         self.env.seed(env_seed)
 
@@ -43,8 +51,10 @@ class Worker(object):
         self.deltas = SharedNoiseTable(deltas, env_seed + 7)
         self.policy_params = policy_params
         if policy_params['type'] == 'linear':
+            print("LinearPolicy2")
             self.policy = LinearPolicy2(policy_params)
         elif policy_params['type'] == 'nn':
+            print("FullyConnectedNeuralNetworkPolicy")
             self.policy = FullyConnectedNeuralNetworkPolicy(policy_params)
         else:
             raise NotImplementedError
@@ -163,7 +173,15 @@ class ARSLearner(object):
 
         logz.configure_output_dir(logdir)
         logz.save_params(params)
-        import pybullet_envs
+        try:
+          import pybullet_envs
+        except:
+          pass
+        try:
+          import tds_environments
+        except:
+          pass
+
         env = gym.make(env_name)
         
         self.timesteps = 0
@@ -200,9 +218,11 @@ class ARSLearner(object):
 
         # initialize policy 
         if policy_params['type'] == 'linear':
+            print("LinearPolicy2")
             self.policy = LinearPolicy2(policy_params)
             self.w_policy = self.policy.get_weights()
         elif policy_params['type'] == 'nn':
+            print("FullyConnectedNeuralNetworkPolicy")
             self.policy = FullyConnectedNeuralNetworkPolicy(policy_params)
             self.w_policy = self.policy.get_weights()
         else:
@@ -364,33 +384,55 @@ class ARSLearner(object):
 
 def run_ars(params):
     dir_path = params['dir_path']
-    activation = params['activation']
+    
     if not(os.path.exists(dir_path)):
         os.makedirs(dir_path)
     logdir = dir_path
     if not(os.path.exists(logdir)):
         os.makedirs(logdir)
 
-    import pybullet_envs
+    try:
+      import pybullet_envs
+    except:
+      pass
+    try:
+      import tds_environments
+    except:
+      pass
     env = gym.make(params['env_name'])
     ob_dim = env.observation_space.shape[0]
     ac_dim = env.action_space.shape[0]
     ac_lb = env.action_space.low
     ac_ub = env.action_space.high
 
-    policy_sizes_list = [int(item) for item in params['policy_network_size_list'][0].split(',')]
-    print("policy_sizes_list=",policy_sizes_list)
     # set policy parameters. Possible filters: 'MeanStdFilter' for v2, 'NoFilter' for v1.
-    policy_params={'type': params["policy_type"],
-                   'ob_filter':params['filter'],
-                   'policy_network_size' : policy_sizes_list,
-                   'ob_dim':ob_dim,
-                   'ac_dim':ac_dim,
-                   'activation' : activation,
-                   'action_lower_bound' : ac_lb,
-                   'action_upper_bound' : ac_ub,
-    }
-
+    if params["policy_type"]=="nn":
+      policy_sizes_string = params['policy_network_size_list'].split(',')
+      print("policy_sizes_string=",policy_sizes_string)
+      policy_sizes_list = [int(item) for item in policy_sizes_string]
+      print("policy_sizes_list=",policy_sizes_list)
+      activation = params['activation']
+      policy_params={'type': params["policy_type"],
+                     'ob_filter':params['filter'],
+                     'policy_network_size' : policy_sizes_list,
+                     'ob_dim':ob_dim,
+                     'ac_dim':ac_dim,
+                     'activation' : activation,
+                     'action_lower_bound' : ac_lb,
+                     'action_upper_bound' : ac_ub,
+      }
+    else:
+      del params['policy_network_size_list']
+      del params['activation']
+      policy_params={'type': params["policy_type"],
+                     'ob_filter':params['filter'],
+                     'ob_dim':ob_dim,
+                     'ac_dim':ac_dim,
+                     'action_lower_bound' : ac_lb,
+                     'action_upper_bound' : ac_ub,
+      }
+    
+    
     ARS = ARSLearner(env_name=params['env_name'],
                      policy_params=policy_params,
                      num_workers=params['n_workers'], 
@@ -432,7 +474,7 @@ if __name__ == '__main__':
     # for ARS V1 use filter = 'NoFilter'
     parser.add_argument('--filter', type=str, default='MeanStdFilter')
     parser.add_argument('--activation', type=str, help="Neural network policy activation function, tanh or clip", default="tanh")
-    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default=[128,64])
+    parser.add_argument('--policy_network_size', action='store', dest='policy_network_size_list',type=str, nargs='*', default='128,64')
     
 
 
