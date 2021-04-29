@@ -69,7 +69,7 @@ class Policy(object):
     raise NotImplementedError
 
 
-class LinearPolicy2(Policy):
+class LinearPolicy(Policy):
   """Linear policy class that computes action as <w, ob>."""
 
   def __init__(self, policy_params, update_filter=True):
@@ -108,6 +108,50 @@ class LinearPolicy2(Policy):
     return actions
 
 
+
+
+#with bias
+class LinearPolicy2(Policy):
+  """Linear policy class that computes action as <w, ob>+bias."""
+
+  def __init__(self, policy_params, update_filter=True):
+    """Initializes the linear policy. See the base class for more details."""
+    Policy.__init__(self, policy_params, update_filter=update_filter)
+    if isinstance(self.ob_dim, dict):
+      self.ob_dim = sum(self.ob_dim.values())
+    self.weights = np.zeros(self.ac_dim * self.ob_dim+self.ac_dim, dtype=np.float64)
+    
+    if "weights" in policy_params:
+      self.update_weights(policy_params["weights"])
+    
+    mean = policy_params.get("observation_filter_mean", None)
+    std = policy_params.get("observation_filter_std", None)
+    
+    if policy_params["ob_filter"]=="MeanStdFilter" and update_filter==False:
+      self.observation_filter.mean = mean
+      self.observation_filter.std = std
+      
+  def act(self, ob):
+    """Maps the observation to action.
+
+    Args:
+      ob: The observations in reinforcement learning.
+    Returns:
+      actions: The actions in reinforcement learning.
+    """
+    ob = self.observation_filter(ob, update=self.update_filter)
+    if isinstance(ob, dict):
+      ob = env_utils.flatten_observations(ob)
+            
+    num_weights = self.ac_dim*self.ob_dim
+    
+    matrix_weights = np.reshape(self.weights[:num_weights], (self.ac_dim, self.ob_dim))
+    bias_weights = self.weights[num_weights:]
+    normalized_actions = np.clip(np.dot(matrix_weights, ob)+bias_weights, -1.0, 1.0)
+    actions = (
+        normalized_actions * (self.action_high - self.action_low) / 2.0 +
+        (self.action_low + self.action_high) / 2.0)
+    return actions
 
 
 class FullyConnectedNeuralNetworkPolicy(Policy):
