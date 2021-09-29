@@ -36,7 +36,6 @@ setup(
     ],
     package_data={'arspb.trained_policies': need_files},
     install_requires=[
-        "ray",
         "pybullet",
     ],
 )
