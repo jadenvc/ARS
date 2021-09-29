@@ -81,7 +81,7 @@ When running a gym environment, it will automatically connect to this GUI window
 To render a trained policy, execute a command of the following form: (--render is not needed, since the env will connect to the running GUI server)
 
 ```
-python arspb/run_policy.py --expert_policy_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/lin_policy_plus.npz --envname=InvertedPendulumSwingupBulletEnv-v0 --json_file=trained_policies/InvertedPendulumSwingupBulletEnv-v0/params.json
+python3 arspb/run_policy.py --expert_policy_file=arspb/trained_policies/InvertedPendulumSwingupBulletEnv-v0/nn_policy_plus.npz --json_file=arspb/trained_policies/InvertedPendulumSwingupBulletEnv-v0/params.json
 ```
 
 Or enjoy a fully connected neural network policy, AntBulletEnv-v0:
