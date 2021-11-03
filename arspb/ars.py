@@ -41,6 +41,10 @@ class Worker(object):
           import tds_environments
         except:
           pass
+        try:
+          import puppersim
+        except:
+          pass
 
         self.env = gym.make(env_name)
         self.env.seed(env_seed)
@@ -179,6 +183,10 @@ class ARSLearner(object):
           pass
         try:
           import tds_environments
+        except:
+          pass
+        try:
+          import puppersim
         except:
           pass
 
@@ -397,6 +405,10 @@ def run_ars(params):
       pass
     try:
       import tds_environments
+    except:
+      pass
+    try:
+      import puppersim
     except:
       pass
     env = gym.make(params['env_name'])
