@@ -89,6 +89,7 @@ class RunningStat(object):
     def push(self, x):
         x = np.asarray(x)
         # Unvectorized update of the running statistics.
+        #print("m", self._M)
         assert x.shape == self._M.shape, ("x.shape = {}, self.shape = {}"
                                           .format(x.shape, self._M.shape))
         n1 = self._n

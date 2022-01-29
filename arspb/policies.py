@@ -191,8 +191,9 @@ class FullyConnectedNeuralNetworkPolicy(Policy):
           self._layer_sizes[ith_layer] * self._layer_sizes[ith_layer + 1])
       self._layer_weight_end_idx.append(num_weights)
     self.weights = np.zeros(num_weights, dtype=np.float64)
-    
+    #print("policy params", policy_params)
     if "weights" in policy_params:
+      print("WE FOUND WEIGHTS !!!!!!!!!!!!!!")
       self.update_weights(policy_params["weights"])
     mean = policy_params.get("observation_filter_mean", None)
     std = policy_params.get("observation_filter_std", None)
@@ -211,7 +212,9 @@ class FullyConnectedNeuralNetworkPolicy(Policy):
     Returns:
       actions: The actions in reinforcement learning.
     """
+    # print("before action", ob)
     ob = self.observation_filter(ob, update=self.update_filter)
+    # print("before action 2", ob)
     if isinstance(ob, dict):
       ob = env_utils.flatten_observations(ob)
     ith_layer_result = ob
