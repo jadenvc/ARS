@@ -55,10 +55,10 @@ class Worker(object):
         self.deltas = SharedNoiseTable(deltas, env_seed + 7)
         self.policy_params = policy_params
         if policy_params['type'] == 'linear':
-            print("LinearPolicy2")
+            #print("LinearPolicy2")
             self.policy = LinearPolicy2(policy_params)
         elif policy_params['type'] == 'nn':
-            print("FullyConnectedNeuralNetworkPolicy")
+            #print("FullyConnectedNeuralNetworkPolicy")
             self.policy = FullyConnectedNeuralNetworkPolicy(policy_params)
         else:
             raise NotImplementedError
